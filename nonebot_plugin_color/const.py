@@ -1,9 +1,61 @@
 COLOR_CHINESE_NAME_MAP = {
     "爱丽丝蓝": "aliceblue",
     "古董白": "antiquewhite",
+    "水绿": "aqua",
+    "碧绿": "aquamarine",
+    "蔚蓝": "azure",
+    "米": "beige",
+    "桔黄": "bisque",
+    "黑": "black",
+    "杏仁白": "blanchedalmond",
+    "蓝": "blue",
+    "蓝紫": "blueviolet",
+    "棕": "brown",
+    "实木": "burlywood",
+    "军服蓝": "cadetblue",
+    "查特酒绿": "chartreuse",
+    "巧克力": "chocolate",
+    "珊瑚红": "coral",
+    "矢车菊蓝": "cornflowerblue",
+    "米绸": "cornsilk",
+    "猩红": "crimson",
+    "青": "cyan",
+    "深蓝": "darkblue",
+    "深青": "darkcyan",
+    "暗金黄": "darkgoldenrod",
+    "深灰": "darkgray",
+    "深绿": "darkgreen",
+    "深卡其布": "darkkhaki",
+    "深洋红": "darkmagenta",
+    "深橄榄绿": "darkolivegreen",
+    "深橙": "darkorange",
+    "暗紫": "darkorchid",
+    "深红": "darkred",
+    "深鲑鱼肉": "darksalmon",
+    "深海绿": "darkseagreen",
+    "深石板灰": "darkslateblue",
+    "墨绿": "darkslategray",
+    "深绿宝石": "darkturquoise",
+    "深紫罗兰": "darkviolet",
+    "深粉红": "deeppink",
+    "深天蓝": "deepskyblue",
+    "暗灰": "dimgray",
+    "道奇蓝": "dodgerblue",
+    "耐火砖": "firebrick",
+    "花白": "floralwhite",
+    "森林绿": "forestgreen",
+    "紫红": "fuchsia",
+    "亮灰": "gainsboro",
+    "幽灵白": "ghostwhite",
+    "金": "gold",
+    "金麒麟": "goldenrod",
+    "灰": "gray",
+    "绿": "green",
+    "绿黄": "greenyellow",
     "蜜瓜": "honeydew",
     "热粉红": "hotpink",
     "印度红": "indianred",
+    "靛蓝": "indigo",
     "靛青": "indigo",
     "象牙": "ivory",
     "黄褐": "khaki",
@@ -90,3 +142,21 @@ COLOR_CHINESE_NAME_MAP = {
     "黄": "yellow",
     "黄绿": "yellowgreen",
 }
+
+
+if __name__ == "__main__":
+    from pydantic.color import COLORS_BY_NAME
+
+    nf = 0
+    print("{")
+    for color in COLORS_BY_NAME:
+        if color.endswith("grey"):
+            continue
+        cns = tuple(k for k, v in COLOR_CHINESE_NAME_MAP.items() if v == color)
+        if not cns:
+            nf += 1
+        cn = ",".join(cns) if cns else None
+        print(f'    "{cn}": "{color}",')
+    print("}")
+
+    print(f"not found: {nf}")
