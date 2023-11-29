@@ -17,7 +17,7 @@ PADDING = 24
 IMG_SIZE = 256
 TITLE_FONT_SIZE = 48
 SUB_FONT_SIZE = 24
-HAS_ALPHA_SIZE_MULTIPLIER = 0.75
+SMALL_SIZE_MULTIPLIER = 0.75
 
 
 def reverse_color(rgb: RGBColorTuple) -> RGBColorTuple:
@@ -41,12 +41,17 @@ async def generate_image(color: Color) -> BytesIO:
     has_alpha = len(pydantic_color) == 4
     sub_size = SUB_FONT_SIZE
     if has_alpha:
-        sub_size = round(sub_size * HAS_ALPHA_SIZE_MULTIPLIER)
+        sub_size = round(sub_size * SMALL_SIZE_MULTIPLIER)
 
     build = partial(Text2Image.from_text, fill=text_color, fontname=font_name)
     hex_text = build(color.as_hex(), TITLE_FONT_SIZE)
     rgb_text = build(color.as_rgb(), sub_size)
     hsl_text = build(color.as_hsl(), sub_size)
+    if hex_text.width > IMG_SIZE:
+        hex_text = build(
+            color.as_hex(),
+            round(TITLE_FONT_SIZE * SMALL_SIZE_MULTIPLIER),
+        )
 
     gap_size = round(
         (
