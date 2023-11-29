@@ -21,6 +21,8 @@ SMALL_SIZE_MULTIPLIER = 0.75
 
 
 def reverse_color(rgb: RGBColorTuple) -> RGBColorTuple:
+    if all(abs(x - 128) < 16 for x in rgb):
+        return (0, 0, 0)
     return cast(RGBColorTuple, tuple(255 - i for i in rgb))
 
 
