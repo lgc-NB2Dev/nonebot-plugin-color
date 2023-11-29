@@ -1,70 +1,69 @@
-import os
-from base64 import b64encode
+from functools import partial
 from io import BytesIO
-from sys import exc_info
-from traceback import format_exc
-from typing import Tuple, Union
+from pathlib import Path
+from typing import Tuple, cast
 
-from nonebot.log import logger
-from PIL import Image, ImageDraw, ImageFont
+from pil_utils import BuildImage, Text2Image
+from pydantic.color import Color
+from pydantic.color import ColorTuple as PyDanticColorTuple
 
-dir = os.path.dirname(os.path.abspath(__file__))
-fontPath = f"{dir}{os.sep}color.ttf"
+RGBColorTuple = Tuple[int, int, int]
+RGBAColorTuple = Tuple[int, int, int, int]
 
+RES_PATH = Path(__file__).parent / "res"
+FONT_PATH = RES_PATH / "HarmonyOS_Sans_Bold.ttf"
 
-def rgb2hex(rgb: Tuple[int, int, int]) -> str:
-    return "#%02X%02X%02X" % rgb
-
-
-def hex2rgb(hex: str) -> Tuple[int, int, int]:
-    hex = hex[1:] if hex[0] == "#" else hex
-    return tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
-
-
-# 相反色 Hex 值生成
-def compColorHex(rgb: Tuple[int, int, int]) -> str:
-    compRgb = tuple(255 - i for i in rgb)
-    return rgb2hex(compRgb)
+PADDING = 24
+IMG_SIZE = 256
+TITLE_FONT_SIZE = 48
+SUB_FONT_SIZE = 24
+HAS_ALPHA_SIZE_MULTIPLIER = 0.75
 
 
-# Pillow 绘制字体设置
-def font(size: int):
-    return ImageFont.truetype(font=fontPath, size=size)
+def reverse_color(rgb: RGBColorTuple) -> RGBColorTuple:
+    return cast(RGBColorTuple, tuple(255 - i for i in rgb))
 
 
-# 图片转换为 Base64 编码
-def img2Base64(pic: Image.Image) -> str:
-    buf = BytesIO()
-    pic.save(buf, format="PNG", quality=100)
-    base64_str = b64encode(buf.getbuffer()).decode()
-    return "base64://" + base64_str
+def trans_pydantic_rgb(color: PyDanticColorTuple) -> RGBAColorTuple:
+    if len(color) == 4:
+        return (*color[:3], int(color[3] * 255))
+    return (*color, 255)
 
 
-# 色图生成！
-async def gnrtImg(color: Union[str, Tuple]) -> str:
-    try:
-        if isinstance(color, str):
-            cHex, cRGB = color.upper(), hex2rgb(color)
-        else:
-            color = tuple(int(i) for i in color)
-            cHex, cRGB = rgb2hex(color), color
-        txtColor = compColorHex(cRGB)
-        img = Image.new("RGB", (200, 200), cRGB)
-        draw = ImageDraw.Draw(img)
-        # 居中绘制 Hex 值
-        hexCenter = font(32).getsize(cHex)
-        draw.text(
-            (int((200 - hexCenter[0]) / 2), 60),
-            cHex, font=font(32), fill=txtColor
+async def generate_image(color: Color) -> BytesIO:
+    pydantic_color = color.as_rgb_tuple()
+    bg_color = trans_pydantic_rgb(pydantic_color)
+    rgb, alpha = bg_color[:3], bg_color[3]
+
+    font_name = str(FONT_PATH)
+    text_color = (*reverse_color(rgb), alpha)
+
+    has_alpha = len(pydantic_color) == 4
+    sub_size = SUB_FONT_SIZE
+    if has_alpha:
+        sub_size = round(sub_size * HAS_ALPHA_SIZE_MULTIPLIER)
+
+    build = partial(Text2Image.from_text, fill=text_color, fontname=font_name)
+    hex_text = build(color.as_hex(), TITLE_FONT_SIZE)
+    rgb_text = build(color.as_rgb(), sub_size)
+    hsl_text = build(color.as_hsl(), sub_size)
+
+    gap_size = round(
+        (
+            IMG_SIZE
+            - (PADDING * 2)
+            - sum(x.height for x in (hex_text, rgb_text, hsl_text))
         )
-        # 居中绘制 RGB 值
-        rgbTxt = f"rgb({', '.join([str(i) for i in cRGB])})"
-        rgbCenter = font(16).getsize(rgbTxt)
-        draw.text(
-            (int((200 - rgbCenter[0]) / 2), 200 - 60 - rgbCenter[1]),
-            rgbTxt, font=font(16), fill=txtColor
+        / 4,
+    )
+
+    img = BuildImage.new("RGBA", (IMG_SIZE, IMG_SIZE), bg_color)
+    y_offset = PADDING + gap_size
+    for text in (hex_text, rgb_text, hsl_text):
+        text.draw_on_image(
+            img.image,
+            (round((IMG_SIZE - text.width) / 2), y_offset),
         )
-        return img2Base64(img)
-    except Exception:
-        logger.warning(format_exc())
-        return "不许色色！\n" + str(exc_info()[0])
+        y_offset += text.height + gap_size
+
+    return img.save_png()
