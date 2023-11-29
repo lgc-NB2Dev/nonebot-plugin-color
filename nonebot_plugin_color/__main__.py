@@ -30,10 +30,16 @@ def parse_color(color: str) -> Optional[Color]:
         return Color(COLOR_CHINESE_NAME_MAP[color])
 
     # old `r g b` format compatibility
-    with suppress(ValueError):
+    with suppress(ColorError, ValueError):
         splitted = color.split()
         if 3 <= len(splitted) <= 4:
-            return Color(splitted)  # type: ignore
+            r, g, b = map(int, splitted[:3])
+            a = (
+                (a if (a := float(splitted[3])) < 1 else a / 255)
+                if len(splitted) == 4
+                else None
+            )
+            return Color((r, g, b) if a is None else (r, g, b, a))
 
     return None
 
