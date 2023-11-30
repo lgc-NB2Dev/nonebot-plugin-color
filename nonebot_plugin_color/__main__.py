@@ -8,7 +8,6 @@ from nonebot.params import Depends, EventMessage
 from nonebot.params import _command_arg as get_command_arg
 from nonebot.typing import T_State
 from nonebot_plugin_alconna.uniseg import Image, UniMessage
-from nonebot_plugin_alconna.uniseg.segment import RawData
 from pydantic.color import Color
 from pydantic.errors import ColorError
 
@@ -83,7 +82,5 @@ async def handle_color(
         await matcher.finish(f"不许色色！\n{type(e).__name__}: {e}")
 
     await matcher.finish(
-        await UniMessage(
-            Image(raw=RawData(data=image, mimetype="image/png")),
-        ).export(),
+        await UniMessage(Image(raw=image)).export(),
     )
