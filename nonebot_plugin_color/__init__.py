@@ -1,33 +1,29 @@
-from re import RegexFlag
+from nonebot.plugin import PluginMetadata, inherit_supported_adapters, require
 
-try:
-    from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-except ImportError:
-    from nonebot.adapters.cqhttp import Bot, MessageSegment
-    from nonebot.adapters.cqhttp.event import MessageEvent
+require("nonebot_plugin_alconna")
 
-from nonebot import on_regex
-from nonebot.typing import T_State
+from . import __main__ as __main__  # noqa: E402
+from .config import ConfigModel  # noqa: E402
 
-from .data_source import gnrtImg
-
-# zero2max = r"(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])"
-color = on_regex(
-    r"^(色图|color)?\s*((#[a-f0-9]{6})|((25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])\s+(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])\s+(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])))$",
-    flags=RegexFlag.IGNORECASE, block=True, priority=13
+__version__ = "0.2.0"
+__plugin_meta__ = PluginMetadata(
+    name="色图生成",
+    description="用于生成指定色彩图片的 NoneBot2 插件",
+    usage=(
+        "插件基于 `pydantic` 的 `Color` 类解析颜色，"
+        "当发送符合其格式的消息时，Bot 将会回复你一张颜色图片\n"
+        " \n"
+        "也可以作为指令 `color` / `色图` 的参数来使用\n"
+        " \n"
+        "例子：\n"
+        "- 颜色别名：`yellow` / `黄` / `黄色`（插件对中文颜色别名做了特殊处理）\n"
+        "- 十六进制（HEX）：`#ff0` / `#ff0f` / `#ffff00` / `#ffff00ff`\n"
+        "- CSS RGB / RGBA：`rgb(255, 255, 0)` / `rgba(255, 255, 255, 1)`\n"
+        "- CSS HSL：`hsl(60, 100%, 50%)` / `hsl(60, 100%, 50%, 1)`"
+    ),
+    type="application",
+    homepage="https://github.com/monsterxcn/nonebot-plugin-color",
+    config=ConfigModel,
+    supported_adapters=inherit_supported_adapters("nonebot_plugin_alconna"),
+    extra={"License": "MIT", "Author": "student_2333"},
 )
-
-
-@color.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
-    if state["_matched_groups"][2]:
-        c = state["_matched_groups"][2]
-    elif state["_matched_groups"][3]:
-        c = state["_matched_groups"][4:7]
-    else:
-        await color.finish("奇怪的颜色增加了呢！")
-    res = await gnrtImg(c)
-    if res[0] == "b":  # "base64://"
-        await color.finish(MessageSegment.image(res))
-    else:
-        await color.finish(res)

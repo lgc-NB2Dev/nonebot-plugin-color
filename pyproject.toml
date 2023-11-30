@@ -1,22 +1,41 @@
-[tool.poetry]
+[project]
 name = "nonebot-plugin-color"
-version = "0.1.1"
+dynamic = ["version"]
 description = "A specified color image generator for Nonebot2"
-authors = ["monsterxcn <monsterxcn@gmail.com>"]
-documentation = "https://github.com/monsterxcn/nonebot-plugin-color#readme"
-license = "MIT"
-homepage = "https://github.com/monsterxcn/nonebot-plugin-color"
+authors = [
+    { name = "monsterxcn", email = "monsterxcn@gmail.com" },
+    { name = "student_2333", email = "lgc2333@126.com" },
+]
+requires-python = ">=3.8,<4.0"
+dependencies = [
+    "nonebot2>=2.1.2",
+    "nonebot-plugin-alconna>=0.33.8",
+    "pil-utils>=0.1.8",
+]
 readme = "README.md"
 keywords = ["nonebot", "nonebot2", "color"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+license = { text = "MIT" }
 
-[tool.poetry.dependencies]
-python = ">=3.7.3,<4.0"
-nonebot2 = ">=2.0.0a14"
-nonebot-adapter-onebot = ">=2.0.0b1"
-Pillow = ">=8.2.0"
+[project.urls]
+homepage = "https://github.com/monsterxcn/nonebot-plugin-color"
+documentation = "https://github.com/monsterxcn/nonebot-plugin-color#readme"
+"Bug Tracker" = "https://github.com/monsterxcn/nonebot-plugin-color/issues"
 
-[tool.poetry.dev-dependencies]
+[tool.pdm.dev-dependencies]
+dev = []
+
+[tool.pdm.version]
+source = "file"
+path = "nonebot_plugin_color/__init__.py"
+
+[tool.pdm.build]
+includes = []
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
