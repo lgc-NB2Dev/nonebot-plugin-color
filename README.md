@@ -104,6 +104,7 @@ plugins = [
 | :-------------------------: | :--: | :----: | :--------------------------------------------: |
 |        `COLOR_REPLY`        |  否  | `True` |                是否回复用户消息                |
 |      `COLOR_SHOW_DESC`      |  否  | `True` | 是否在图片下方追加文字形式的颜色值便于复制使用 |
+|      `COLOR_SHOW_TEXT`      |  否  | `True` |           是否在生成的图片中显示色号           |
 |  `COLOR_ENABLE_ON_MESSAGE`  |  否  | `True` |          是否响应符合格式的非指令消息          |
 | `COLOR_ON_MESSAGE_PRIORITY` |  否  |  `5`   |              非指令消息响应优先级              |
 
@@ -154,6 +155,11 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.3.1
+
+- 修复标题字号不会被正确缩小的 bug
+- 新增配置项 `COLOR_SHOW_TEXT`
 
 ### 0.3.0
 

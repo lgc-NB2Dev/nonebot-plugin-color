@@ -10,6 +10,8 @@ from pil_utils.types import ColorType
 from pydantic.color import Color
 from pydantic.color import ColorTuple as PyDanticColorTuple
 
+from .config import config
+
 RGBColorTuple = Tuple[int, int, int]
 RGBAColorTuple = Tuple[int, int, int, int]
 
@@ -57,7 +59,7 @@ class ColorText:
         self.hex_text = build(target_color.as_hex(), TITLE_FONT_SIZE)
         self.rgb_text = build(target_color.as_rgb(), sub_size)
         self.hsl_text = build(target_color.as_hsl(), sub_size)
-        if self.hex_text.width > (IMG_SIZE + PADDING):  # 两侧留 PADDING / 2
+        if self.hex_text.width > (IMG_SIZE - PADDING):  # 两侧留 PADDING / 2
             self.hex_text = build(
                 target_color.as_hex(),
                 round(TITLE_FONT_SIZE * SMALL_SIZE_MULTIPLIER),
@@ -98,7 +100,13 @@ def make_color_stop(*colors: RGBAColorTuple) -> List[ColorStop]:
 
 
 def generate_solid_image(color: Color) -> BytesIO:
-    return BuildImage(ColorText(color).to_image()).save_png()
+    if config.color_show_text:
+        return BuildImage(ColorText(color).to_image()).save_png()
+    return BuildImage.new(
+        "RGBA",
+        (IMG_SIZE, IMG_SIZE),
+        trans_pydantic_rgba(color.as_rgb_tuple()),
+    ).save_png()
 
 
 def generate_gradient_image(*colors: Color) -> BytesIO:
@@ -113,18 +121,19 @@ def generate_gradient_image(*colors: Color) -> BytesIO:
         gradient_xy,
         make_color_stop(*colors_rgba),
     )
-    text_gradient = LinearGradient(
-        gradient_xy,
-        make_color_stop(*((*reverse_color(x[:3]), x[3]) for x in colors_rgba)),
-    )
-
-    text_gradient_img = text_gradient.create_image(image_size).convert("RGBA")
-    text_mask = Image.new("RGBA", image_size)
-    for i, x in enumerate(colors):
-        ColorText(x).draw_on_image(text_mask, (i * IMG_SIZE, 0))
-
     bg_gradient_img = bg_gradient.create_image(image_size).convert("RGBA")
-    bg_gradient_img.paste(text_gradient_img, mask=text_mask)
+
+    if config.color_show_text:
+        text_gradient = LinearGradient(
+            gradient_xy,
+            make_color_stop(*((*reverse_color(x[:3]), x[3]) for x in colors_rgba)),
+        )
+        text_gradient_img = text_gradient.create_image(image_size).convert("RGBA")
+        text_mask = Image.new("RGBA", image_size)
+        for i, x in enumerate(colors):
+            ColorText(x).draw_on_image(text_mask, (i * IMG_SIZE, 0))
+        bg_gradient_img.paste(text_gradient_img, mask=text_mask)
+
     return BuildImage(bg_gradient_img).save_png()
 
 
