@@ -17,7 +17,7 @@ __plugin_meta__ = PluginMetadata(
         " \n"
         "例子：\n"
         "- 颜色别名：`yellow` / `黄` / `黄色`（插件对中文颜色别名做了特殊处理）\n"
-        "- 十六进制（HEX）：`#ff0` / `#ff0f` / `#ffff00` / `#ffff00ff`\n"
+        "- 十六进制（HEX）：`#ff0` / `#ff0f` / `#ffff00` / `#ffff00ff` / `0xff0` / `ff0`\n"
         "- CSS RGB / RGBA：`rgb(255, 255, 0)` / `rgba(255, 255, 255, 1)`\n"
         "- CSS HSL：`hsl(60, 100%, 50%)` / `hsl(60, 100%, 50%, 1)`"
     ),

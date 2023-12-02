@@ -110,19 +110,44 @@ plugins = [
 例子：
 
 - 颜色别名：`yellow` / `黄` / `黄色`（插件对中文颜色别名做了特殊处理，支持的名称列表见 [const.py](./nonebot_plugin_color/const.py)）
-- 十六进制（HEX）：`#ff0` / `#ff0f` / `#ffff00` / `#ffff00ff`
+- 十六进制（HEX）：`#ff0` / `#ff0f` / `#ffff00` / `#ffff00ff` / `0xff0` / `ff0`
 - CSS RGB / RGBA：`rgb(255, 255, 0)` / `rgba(255, 255, 255, 1)`
 - CSS HSL：`hsl(60, 100%, 50%)` / `hsl(60, 100%, 50%, 1)`
 
 <details>
 <summary><i>哎哟这个色啊！好色！</i></summary>
 
-![色图来咯](./res/screenshot.png)
+![色图来咯](https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/color/screenshot.png)
 
 </details>
+
+## 📞 联系
+
+QQ：3076823485  
+Telegram：[@lgc2333](https://t.me/lgc2333)  
+吹水群：[1105946125](https://jq.qq.com/?_wv=1027&k=Z3n1MpEp)  
+邮箱：<lgc2333@126.com>
 
 ## 💡 鸣谢
 
 - [@nonebot/nonebot2](https://github.com/nonebot/nonebot2/)
 - [@nonebot/plugin-alconna](https://github.com/nonebot/plugin-alconna)
 - [@Mrs4s/go-cqhttp](https://github.com/Mrs4s/go-cqhttp)
+
+## 💰 赞助
+
+感谢大家的赞助！你们的赞助将是我继续创作的动力！
+
+- [爱发电](https://afdian.net/@lgc2333)
+- <details>
+    <summary>赞助二维码（点击展开）</summary>
+
+  ![讨饭](https://raw.githubusercontent.com/lgc2333/ShigureBotMenu/master/src/imgs/sponsor.png)
+
+  </details>
+
+## 📝 更新日志
+
+### 0.2.0
+
+- 重构项目
