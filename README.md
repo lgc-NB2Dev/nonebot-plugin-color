@@ -98,26 +98,33 @@ plugins = [
 
 ## ⚙️ 配置
 
-无
+在 NoneBot2 项目的 `.env` 文件中添加下表中的必填配置
+
+|           配置项            | 必填 | 默认值 |                      说明                      |
+| :-------------------------: | :--: | :----: | :--------------------------------------------: |
+|        `COLOR_REPLY`        |  否  | `True` |                是否回复用户消息                |
+|      `COLOR_SHOW_DESC`      |  否  | `True` | 是否在图片下方追加文字形式的颜色值便于复制使用 |
+|  `COLOR_ENABLE_ON_MESSAGE`  |  否  | `True` |          是否响应符合格式的非指令消息          |
+| `COLOR_ON_MESSAGE_PRIORITY` |  否  |  `5`   |              非指令消息响应优先级              |
 
 ## 🎉 使用
 
-插件基于 `pydantic` 的 `Color` 类解析颜色，详见 [这里](https://docs.pydantic.dev/1.10/usage/types/#color-type)  
-当发送符合其格式的消息时，Bot 将会回复你一张颜色图片
+插件基于 `pydantic` 的 `Color` 类解析颜色，将下方支持的颜色值格式作为指令 `color` / `色图` 的参数发送即可
 
-也可以作为指令 `color` / `色图` 的参数来使用
-
-例子：
-
-- 颜色别名：`yellow` / `黄` / `黄色`（插件对中文颜色别名做了特殊处理，支持的名称列表见 [const.py](./nonebot_plugin_color/const.py)）
+- 颜色别名：`yellow` / `黄` / `黄色`（插件对部分中文颜色别名做了处理，支持的名称列表见 [const.py](./nonebot_plugin_color/const.py)）
 - 十六进制（HEX）：`#ff0` / `#ff0f` / `#ffff00` / `#ffff00ff` / `0xff0` / `ff0`
-- CSS RGB / RGBA：`rgb(255, 255, 0)` / `rgba(255, 255, 255, 1)`
-- CSS HSL：`hsl(60, 100%, 50%)` / `hsl(60, 100%, 50%, 1)`
+- CSS RGB / RGBA：`rgb(255, 255, 0)` / `rgba(255, 255, 255, 0.5)`
+- CSS HSL：`hsl(60, 100%, 50%)` / `hsl(60, 100%, 50%, 0.5)`
+- RGB / RGBA（空格分隔）：`255 255 0` / `255 255 0 128` / `255 255 0 0.5`（A 小于 1 时代表百分比）
+
+插件还支持渐变色，将上面支持的颜色格式使用 `;` 或 `；` 分隔即可生成渐变色图片，同样支持透明度，例：`color f00;0f0;00f`  
+~~不！够！色！我要五彩斑斓的黑和五颜六色的白！~~
 
 <details>
 <summary><i>哎哟这个色啊！好色！</i></summary>
 
-![色图来咯](https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/color/screenshot.png)
+![色图来咯](https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/color/screenshot.png)  
+![色图又来咯](https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/color/screenshot2.png)
 
 </details>
 
@@ -147,6 +154,15 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.3.0
+
+- 支持了渐变色（[#1](https://github.com/lgc-NB2Dev/nonebot-plugin-color/issues/1)）
+- 添加了一些配置项：
+  - `COLOR_REPLY`
+  - `COLOR_SHOW_DESC`
+  - `COLOR_ENABLE_ON_MESSAGE`
+  - `COLOR_ON_MESSAGE_PRIORITY`
 
 ### 0.2.0
 
