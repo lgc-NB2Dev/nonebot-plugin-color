@@ -103,9 +103,10 @@ async def handle_color(
 
     msg_list: List[Segment] = [Image(raw=image)]
     if config.color_show_desc:
-        image_desc = "\n".join(
-            f"{i}. {c.as_hex()} | {c.as_rgb()} | {c.as_hsl()}"
-            for i, c in enumerate(colors, 1)
+        image_desc = (
+            f"HEX: {'; '.join(x.as_hex() for x in colors)}\n"
+            f"RGB: {'; '.join(x.as_rgb() for x in colors)}\n"
+            f"HSL: {'; '.join(x.as_hsl() for x in colors)}"
         )
         msg_list.append(Text(image_desc))
 
