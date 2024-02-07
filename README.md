@@ -107,6 +107,7 @@ plugins = [
 |      `COLOR_SHOW_TEXT`      |  否  | `True` |           是否在生成的图片中显示色号           |
 |  `COLOR_ENABLE_ON_MESSAGE`  |  否  | `True` |          是否响应符合格式的非指令消息          |
 | `COLOR_ON_MESSAGE_PRIORITY` |  否  |  `5`   |              非指令消息响应优先级              |
+|    `COLOR_HEX_WITH_SIGN`    |  否  | `True` |     是否在 `HEX` 颜色代码前有 `#` 才进行响应    |
 
 ## 🎉 使用
 
