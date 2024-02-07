@@ -1,3 +1,4 @@
+import re
 from contextlib import suppress
 from typing import List, Type, Union
 
@@ -16,6 +17,7 @@ from .const import COLOR_CHINESE_NAME_MAP
 from .data_source import generate_image
 
 KEY_COLOR = "color"
+HEX_REGEX = re.compile(r'([0-9a-fA-F]{3,4}){1,2}')
 
 
 class NotValidColorError(ValueError):
@@ -24,6 +26,8 @@ class NotValidColorError(ValueError):
 
 
 def parse_color(color: str) -> Color:
+    if config.color_hex_with_sign and HEX_REGEX.fullmatch(color):
+        return
     with suppress(ColorError):
         return Color(color)
 
