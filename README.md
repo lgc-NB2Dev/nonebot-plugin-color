@@ -157,6 +157,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.3.2
+
+- 新增配置项 `COLOR_HEX_WITH_SIGN`
+
 ### 0.3.1
 
 - 修复标题字号不会被正确缩小的 bug
