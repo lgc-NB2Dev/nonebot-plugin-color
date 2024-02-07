@@ -27,7 +27,7 @@ class NotValidColorError(ValueError):
 
 def parse_color(color: str) -> Color:
     if config.color_hex_with_sign and HEX_REGEX.fullmatch(color):
-        return
+        raise NotValidColorError(color)
     with suppress(ColorError):
         return Color(color)
 
