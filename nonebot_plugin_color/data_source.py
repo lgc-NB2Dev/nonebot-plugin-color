@@ -7,8 +7,7 @@ from PIL import Image
 from pil_utils import BuildImage, Text2Image
 from pil_utils.gradient import ColorStop, LinearGradient
 from pil_utils.types import ColorType
-from pydantic.color import Color
-from pydantic.color import ColorTuple as PyDanticColorTuple
+from pydantic.color import Color, ColorTuple as PyDanticColorTuple
 
 from .config import config
 

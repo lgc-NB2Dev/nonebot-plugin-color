@@ -5,8 +5,7 @@ from typing import List, Type, Union
 from nonebot import logger, on_command, on_message
 from nonebot.adapters import Message as BaseMessage
 from nonebot.matcher import Matcher
-from nonebot.params import Depends, EventMessage
-from nonebot.params import _command_arg as get_command_arg
+from nonebot.params import Depends, EventMessage, _command_arg as get_command_arg
 from nonebot.typing import T_State
 from nonebot_plugin_alconna.uniseg import Image, Segment, Text, UniMessage
 from pydantic.color import Color
@@ -17,7 +16,7 @@ from .const import COLOR_CHINESE_NAME_MAP
 from .data_source import generate_image
 
 KEY_COLOR = "color"
-HEX_REGEX = re.compile(r'([0-9a-fA-F]{3,4}){1,2}')
+HEX_REGEX = re.compile(r"([0-9a-fA-F]{3,4}){1,2}")
 
 
 class NotValidColorError(ValueError):
