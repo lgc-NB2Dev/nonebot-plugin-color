@@ -1,15 +1,39 @@
+import re
+from contextlib import suppress
 from functools import partial
 from io import BytesIO
 from pathlib import Path
 from typing import List, Optional, Tuple, cast
 
+from nonebot.compat import PYDANTIC_V2
 from PIL import Image
 from pil_utils import BuildImage, Text2Image
 from pil_utils.gradient import ColorStop, LinearGradient
 from pil_utils.types import ColorType
-from pydantic.color import Color, ColorTuple as PyDanticColorTuple
 
 from .config import config
+from .const import COLOR_CHINESE_NAME_MAP
+
+if PYDANTIC_V2:
+    from pydantic_core import PydanticCustomError as ColorError
+
+    try:
+        from pydantic_extra_types.color import (
+            Color as Color,
+            ColorTuple as PyDanticColorTuple,
+        )
+    except ImportError as e:
+        raise ImportError(
+            "Missing required dependency, "
+            "please use `pip install nonebot-plugin-color[pyd2]` to install",
+        ) from e
+else:
+    from pydantic.color import (
+        Color as Color,
+        ColorError as ColorError,  # type: ignore
+        ColorTuple as PyDanticColorTuple,
+    )
+
 
 RGBColorTuple = Tuple[int, int, int]
 RGBAColorTuple = Tuple[int, int, int, int]
@@ -23,6 +47,55 @@ IMG_SIZE = 256
 TITLE_FONT_SIZE = 48
 SUB_FONT_SIZE = 24
 SMALL_SIZE_MULTIPLIER = 0.75
+
+
+HEX_REGEX = re.compile(r"([0-9a-fA-F]{3,4}){1,2}")
+
+
+class NotValidColorError(ValueError):
+    def __init__(self, color: str) -> None:
+        self.color = color
+
+
+def parse_color(color: str) -> Color:
+    if config.color_hex_with_sign and HEX_REGEX.fullmatch(color):
+        raise NotValidColorError(color)
+    with suppress(ColorError):
+        return Color(color)
+
+    # chinese name compatibility
+    if color.endswith("色"):
+        color = color[:-1]
+    if color in COLOR_CHINESE_NAME_MAP:
+        return Color(COLOR_CHINESE_NAME_MAP[color])
+
+    # old `r g b` format compatibility
+    with suppress(ColorError, ValueError):
+        splitted = color.split()
+        if 3 <= len(splitted) <= 4:
+            r, g, b = map(int, splitted[:3])
+            a = (
+                (a if (a := float(splitted[3])) < 1 else a / 255)
+                if len(splitted) == 4
+                else None
+            )
+            return Color((r, g, b) if a is None else (r, g, b, a))
+
+    raise NotValidColorError(color)
+
+
+def split_multi(text: str, *seps: str) -> List[str]:
+    pri, *rest = seps
+    for sep in rest:
+        text = text.replace(sep, pri)
+    return text.split(pri)
+
+
+def parse_multi_color(color: str) -> List[Color]:
+    if not color:
+        return []
+    color_strs = [x.strip() for x in split_multi(color, ";", "；")]
+    return [parse_color(color_str) for color_str in color_strs]
 
 
 def reverse_color(rgb: RGBColorTuple) -> RGBColorTuple:

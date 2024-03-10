@@ -1,6 +1,5 @@
-import re
 from contextlib import suppress
-from typing import List, Type, Union
+from typing import List, Type, Union, cast
 
 from nonebot import logger, on_command, on_message
 from nonebot.adapters import Message as BaseMessage
@@ -8,61 +7,11 @@ from nonebot.matcher import Matcher
 from nonebot.params import Depends, EventMessage, _command_arg as get_command_arg
 from nonebot.typing import T_State
 from nonebot_plugin_alconna.uniseg import Image, Segment, Text, UniMessage
-from pydantic.color import Color
-from pydantic.errors import ColorError
 
 from .config import config
-from .const import COLOR_CHINESE_NAME_MAP
-from .data_source import generate_image
+from .data_source import Color, NotValidColorError, generate_image, parse_multi_color
 
 KEY_COLOR = "color"
-HEX_REGEX = re.compile(r"([0-9a-fA-F]{3,4}){1,2}")
-
-
-class NotValidColorError(ValueError):
-    def __init__(self, color: str) -> None:
-        self.color = color
-
-
-def parse_color(color: str) -> Color:
-    if config.color_hex_with_sign and HEX_REGEX.fullmatch(color):
-        raise NotValidColorError(color)
-    with suppress(ColorError):
-        return Color(color)
-
-    # chinese name compatibility
-    if color.endswith("色"):
-        color = color[:-1]
-    if color in COLOR_CHINESE_NAME_MAP:
-        return Color(COLOR_CHINESE_NAME_MAP[color])
-
-    # old `r g b` format compatibility
-    with suppress(ColorError, ValueError):
-        splitted = color.split()
-        if 3 <= len(splitted) <= 4:
-            r, g, b = map(int, splitted[:3])
-            a = (
-                (a if (a := float(splitted[3])) < 1 else a / 255)
-                if len(splitted) == 4
-                else None
-            )
-            return Color((r, g, b) if a is None else (r, g, b, a))
-
-    raise NotValidColorError(color)
-
-
-def split_multi(text: str, *seps: str) -> List[str]:
-    pri, *rest = seps
-    for sep in rest:
-        text = text.replace(sep, pri)
-    return text.split(pri)
-
-
-def parse_multi_color(color: str) -> List[Color]:
-    if not color:
-        return []
-    color_strs = [x.strip() for x in split_multi(color, ";", "；")]
-    return [parse_color(color_str) for color_str in color_strs]
 
 
 async def rule_color_msg(state: T_State, msg: BaseMessage = EventMessage()) -> bool:
@@ -79,7 +28,7 @@ async def dep_color(state: T_State) -> Union[List[Color], NotValidColorError]:
 
     arg = get_command_arg(state).extract_plain_text().strip()
     try:
-        return parse_multi_color(arg)
+        return cast(List[Color], parse_multi_color(arg))
     except NotValidColorError as e:
         return e
 

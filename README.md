@@ -21,6 +21,9 @@ _✨ 用于生成指定色彩图片的 NoneBot2 插件 ✨_
 
 <br />
 
+<a href="https://pydantic.dev">
+  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/template/pyd-v1-or-v2.json" alt="Pydantic Version 1 Or 2" >
+</a>
 <a href="./LICENSE">
   <img src="https://img.shields.io/github/license/monsterxcn/nonebot-plugin-color.svg" alt="license">
 </a>
@@ -106,7 +109,7 @@ plugins = [
 |      `COLOR_SHOW_DESC`      |  否  | `True` | 是否在图片下方追加文字形式的颜色值便于复制使用 |
 |      `COLOR_SHOW_TEXT`      |  否  | `True` |           是否在生成的图片中显示色号           |
 |  `COLOR_ENABLE_ON_MESSAGE`  |  否  | `True` |          是否响应符合格式的非指令消息          |
-|    `COLOR_HEX_WITH_SIGN`    |  否  | `True` |     是否在 `HEX` 颜色代码前有 `#` 才进行响应    |
+|    `COLOR_HEX_WITH_SIGN`    |  否  | `True` |    是否在 `HEX` 颜色代码前有 `#` 才进行响应    |
 | `COLOR_ON_MESSAGE_PRIORITY` |  否  |  `5`   |              非指令消息响应优先级              |
 
 ## 🎉 使用
@@ -156,6 +159,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.4.0
+
+- 适配 Pydantic V1 & V2
 
 ### 0.3.2
 
