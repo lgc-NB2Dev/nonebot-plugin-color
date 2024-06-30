@@ -8,9 +8,9 @@ authors = [
 ]
 requires-python = ">=3.9,<4.0"
 dependencies = [
-    "nonebot2>=2.2.0",
-    "nonebot-plugin-alconna>=0.40.1",
-    "pil-utils>=0.1.8",
+    "nonebot2>=2.3.1",
+    "nonebot-plugin-alconna>=0.48.0",
+    "pil-utils>=0.1.10",
 ]
 readme = "README.md"
 keywords = ["nonebot", "nonebot2", "color"]
@@ -27,7 +27,9 @@ documentation = "https://github.com/monsterxcn/nonebot-plugin-color#readme"
 "Bug Tracker" = "https://github.com/monsterxcn/nonebot-plugin-color/issues"
 
 [project.optional-dependencies]
-pyd2 = ["pydantic-extra-types>=2.6.0"]
+pyd2 = [
+    "pydantic-extra-types>=2.8.2",
+]
 
 [tool.pdm.version]
 source = "file"
