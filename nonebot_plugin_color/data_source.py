@@ -3,8 +3,9 @@ from contextlib import suppress
 from functools import partial
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, Union, cast
 
+from nonebot import logger
 from nonebot.compat import PYDANTIC_V2
 from PIL import Image
 from pil_utils import BuildImage, Text2Image
@@ -14,25 +15,23 @@ from pil_utils.types import ColorType
 from .config import config
 from .const import COLOR_CHINESE_NAME_MAP
 
-if PYDANTIC_V2:
-    from pydantic_core import PydanticCustomError as ColorError
+PyDanticColorTuple = Union[Tuple[int, int, int], Tuple[int, int, int, float]]
 
+if PYDANTIC_V2:
     try:
-        from pydantic_extra_types.color import (
-            Color as Color,
-            ColorTuple as PyDanticColorTuple,
-        )
-    except ImportError as e:
-        raise ImportError(
-            "Missing required dependency, "
+        from pydantic_core import PydanticCustomError as ColorError
+        from pydantic_extra_types.color import Color
+    except ImportError:
+        logger.warning(
+            "Missing suggested dependency, "
             "please use `pip install nonebot-plugin-color[pyd2]` to install",
-        ) from e
+        )
+        logger.warning("Fallback to pydantic v1 Color class")
+        from pydantic.v1.color import Color
+        from pydantic.v1.errors import ColorError
 else:
-    from pydantic.color import (
-        Color as Color,
-        ColorError as ColorError,  # type: ignore
-        ColorTuple as PyDanticColorTuple,
-    )
+    from pydantic.color import Color
+    from pydantic.errors import ColorError
 
 
 RGBColorTuple = Tuple[int, int, int]
@@ -98,16 +97,29 @@ def parse_multi_color(color: str) -> List[Color]:
     return [parse_color(color_str) for color_str in color_strs]
 
 
+def trans_pydantic_rgba(color: PyDanticColorTuple) -> RGBAColorTuple:
+    if len(color) == 4:
+        return (*color[:3], int(color[3] * 255))
+    return (*color, 255)
+
+
 def reverse_color(rgb: RGBColorTuple) -> RGBColorTuple:
     if all(abs(x - 128) < 16 for x in rgb):
         return (0, 0, 0)
     return cast(RGBColorTuple, tuple(255 - i for i in rgb))
 
 
-def trans_pydantic_rgba(color: PyDanticColorTuple) -> RGBAColorTuple:
-    if len(color) == 4:
-        return (*color[:3], int(color[3] * 255))
-    return (*color, 255)
+def reverse_to_black_or_white(rgb: RGBColorTuple) -> RGBColorTuple:
+    light = Color(rgb).as_hsl_tuple()[2]
+    return (255, 255, 255) if light < 0.4375 else (0, 0, 0)
+
+
+def calc_text_color(rgb: RGBColorTuple) -> RGBColorTuple:
+    return (
+        reverse_to_black_or_white(rgb)
+        if config.color_text_black_n_white
+        else reverse_color(rgb)
+    )
 
 
 class ColorText:
@@ -125,7 +137,7 @@ class ColorText:
 
         build = partial(
             Text2Image.from_text,
-            fill=text_color or reverse_color(target_rgb_tuple[:3]),
+            fill=text_color or calc_text_color(target_rgb_tuple[:3]),
             fontname=FONT_NAME,
         )
         self.hex_text = build(target_color.as_hex(), TITLE_FONT_SIZE)
@@ -167,8 +179,15 @@ class ColorText:
 
 
 def make_color_stop(*colors: RGBAColorTuple) -> List[ColorStop]:
-    part_len = len(colors) - 1
-    return [ColorStop((i / part_len), x) for i, x in enumerate(colors)]
+    step_len = 1 / (len(colors) * 2)
+    center_steps = [
+        ColorStop(step_len * ((2 * i) + 1), c) for i, c in enumerate(colors)
+    ]
+    return [
+        ColorStop(0, colors[0]),
+        *center_steps,
+        ColorStop(1, colors[-1]),
+    ]
 
 
 def generate_solid_image(color: Color) -> BytesIO:
@@ -196,15 +215,19 @@ def generate_gradient_image(*colors: Color) -> BytesIO:
     bg_gradient_img = bg_gradient.create_image(image_size).convert("RGBA")
 
     if config.color_show_text:
-        text_gradient = LinearGradient(
-            gradient_xy,
-            make_color_stop(*((*reverse_color(x[:3]), x[3]) for x in colors_rgba)),
-        )
-        text_gradient_img = text_gradient.create_image(image_size).convert("RGBA")
-        text_mask = Image.new("RGBA", image_size)
-        for i, x in enumerate(colors):
-            ColorText(x).draw_on_image(text_mask, (i * IMG_SIZE, 0))
-        bg_gradient_img.paste(text_gradient_img, mask=text_mask)
+        if config.color_text_black_n_white:
+            for i, x in enumerate(colors):
+                ColorText(x).draw_on_image(bg_gradient_img, (i * IMG_SIZE, 0))
+        else:
+            text_gradient = LinearGradient(
+                gradient_xy,
+                make_color_stop(*((*reverse_color(x[:3]), x[3]) for x in colors_rgba)),
+            )
+            text_gradient_img = text_gradient.create_image(image_size).convert("RGBA")
+            text_mask = Image.new("RGBA", image_size)
+            for i, x in enumerate(colors):
+                ColorText(x).draw_on_image(text_mask, (i * IMG_SIZE, 0))
+            bg_gradient_img.paste(text_gradient_img, mask=text_mask)
 
     return BuildImage(bg_gradient_img).save_png()
 

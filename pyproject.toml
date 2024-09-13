@@ -27,9 +27,8 @@ documentation = "https://github.com/monsterxcn/nonebot-plugin-color#readme"
 "Bug Tracker" = "https://github.com/monsterxcn/nonebot-plugin-color/issues"
 
 [project.optional-dependencies]
-pyd2 = [
-    "pydantic-extra-types>=2.8.2",
-]
+pyd2 = ["pydantic-extra-types>=2.8.2"]
+all = ["nonebot-plugin-color[pyd2]"]
 
 [tool.pdm.version]
 source = "file"

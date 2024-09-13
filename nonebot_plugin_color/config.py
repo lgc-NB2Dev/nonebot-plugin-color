@@ -9,6 +9,7 @@ class ConfigModel(BaseModel):
     color_enable_on_message: bool = True
     color_on_message_priority: int = 5
     color_hex_with_sign: bool = True
+    color_text_black_n_white: bool = False
 
 
 config = get_plugin_config(ConfigModel)
