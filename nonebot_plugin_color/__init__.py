@@ -5,7 +5,7 @@ require("nonebot_plugin_alconna")
 from . import __main__ as __main__  # noqa: E402
 from .config import ConfigModel  # noqa: E402
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 __plugin_meta__ = PluginMetadata(
     name="色图生成",
     description="用于生成指定色彩图片的 NoneBot2 插件",

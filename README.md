@@ -164,6 +164,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.4.2
+
+- 修复 [#7](https://github.com/lgc-NB2Dev/nonebot-plugin-color/issues/7) (可能)
+
 ### 0.4.1
 
 - 添加配置 `COLOR_TEXT_BLACK_N_WHITE` 以使图片中文字仅为黑色和白色

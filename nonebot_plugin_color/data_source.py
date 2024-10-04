@@ -18,17 +18,18 @@ from .const import COLOR_CHINESE_NAME_MAP
 PyDanticColorTuple = Union[Tuple[int, int, int], Tuple[int, int, int, float]]
 
 if PYDANTIC_V2:
+    from pydantic_core import PydanticCustomError as ColorError
+
     try:
-        from pydantic_core import PydanticCustomError as ColorError
         from pydantic_extra_types.color import Color
     except ImportError:
         logger.warning(
             "Missing suggested dependency, "
             "please use `pip install nonebot-plugin-color[pyd2]` to install",
         )
-        logger.warning("Fallback to pydantic v1 Color class")
-        from pydantic.v1.color import Color
-        from pydantic.v1.errors import ColorError
+        logger.warning("Fallback to pydantic deprecated Color class")
+        from pydantic.color import Color
+
 else:
     from pydantic.color import Color
     from pydantic.errors import ColorError
