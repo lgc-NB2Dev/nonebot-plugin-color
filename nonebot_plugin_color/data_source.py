@@ -2,7 +2,6 @@ import re
 from contextlib import suppress
 from functools import partial
 from io import BytesIO
-from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
 
 from nonebot import logger
@@ -10,7 +9,7 @@ from nonebot.compat import PYDANTIC_V2
 from PIL import Image
 from pil_utils import BuildImage, Text2Image
 from pil_utils.gradient import ColorStop, LinearGradient
-from pil_utils.types import ColorType
+from pil_utils.typing import ColorType
 
 from .config import config
 from .const import COLOR_CHINESE_NAME_MAP
@@ -38,16 +37,11 @@ else:
 RGBColorTuple = Tuple[int, int, int]
 RGBAColorTuple = Tuple[int, int, int, int]
 
-RES_PATH = Path(__file__).parent / "res"
-FONT_PATH = RES_PATH / "HarmonyOS_Sans_Bold.ttf"
-FONT_NAME = str(FONT_PATH)
-
 PADDING = 24
 IMG_SIZE = 256
 TITLE_FONT_SIZE = 48
 SUB_FONT_SIZE = 24
 SMALL_SIZE_MULTIPLIER = 0.75
-
 
 HEX_REGEX = re.compile(r"([0-9a-fA-F]{3,4}){1,2}")
 
@@ -64,8 +58,7 @@ def parse_color(color: str) -> Color:
         return Color(color)
 
     # chinese name compatibility
-    if color.endswith("色"):
-        color = color[:-1]
+    color = color.removesuffix("色")
     if color in COLOR_CHINESE_NAME_MAP:
         return Color(COLOR_CHINESE_NAME_MAP[color])
 
@@ -139,12 +132,13 @@ class ColorText:
         build = partial(
             Text2Image.from_text,
             fill=text_color or calc_text_color(target_rgb_tuple[:3]),
-            fontname=FONT_NAME,
+            font_style="bold",
+            font_families=config.color_font_families,
         )
         self.hex_text = build(target_color.as_hex(), TITLE_FONT_SIZE)
         self.rgb_text = build(target_color.as_rgb(), sub_size)
         self.hsl_text = build(target_color.as_hsl(), sub_size)
-        if self.hex_text.width > (IMG_SIZE - PADDING):  # 两侧留 PADDING / 2
+        if self.hex_text.longest_line > (IMG_SIZE - PADDING):  # 两侧留 PADDING / 2
             self.hex_text = build(
                 target_color.as_hex(),
                 round(TITLE_FONT_SIZE * SMALL_SIZE_MULTIPLIER),
@@ -165,7 +159,7 @@ class ColorText:
         for text in (self.hex_text, self.rgb_text, self.hsl_text):
             text.draw_on_image(
                 img,
-                (((IMG_SIZE - text.width) // 2) + gx, y_offset + gy),
+                (((IMG_SIZE - text.longest_line) // 2) + gx, y_offset + gy),
             )
             y_offset += text.height + gap_size
 
