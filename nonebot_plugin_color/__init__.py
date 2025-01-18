@@ -27,5 +27,5 @@ __plugin_meta__ = PluginMetadata(
     homepage="https://github.com/monsterxcn/nonebot-plugin-color",
     config=ConfigModel,
     supported_adapters=inherit_supported_adapters("nonebot_plugin_alconna"),
-    extra={"License": "MIT", "Author": "monsterxcn & student_2333"},
+    extra={"License": "MIT", "Author": "monsterxcn & LgCookie"},
 )
