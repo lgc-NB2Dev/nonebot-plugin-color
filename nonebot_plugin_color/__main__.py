@@ -1,5 +1,5 @@
 from contextlib import suppress
-from typing import List, Type, Union, cast
+from typing import cast
 
 from nonebot import logger, on_command, on_message
 from nonebot.adapters import Message as BaseMessage
@@ -22,13 +22,13 @@ async def rule_color_msg(state: T_State, msg: BaseMessage = EventMessage()) -> b
     return False
 
 
-async def dep_color(state: T_State) -> Union[List[Color], NotValidColorError]:
+async def dep_color(state: T_State) -> list[Color] | NotValidColorError:
     if KEY_COLOR in state and (color := state[KEY_COLOR]):
         return color
 
     arg = get_command_arg(state).extract_plain_text().strip()
     try:
-        return cast(List[Color], parse_multi_color(arg))
+        return cast("list[Color]", parse_multi_color(arg))
     except NotValidColorError as e:
         return e
 
@@ -42,7 +42,7 @@ async def handle_color_error(
 
 async def handle_color(
     matcher: Matcher,
-    colors: List[Color] = Depends(dep_color),
+    colors: list[Color] = Depends(dep_color),
 ):
     if not colors:
         await matcher.finish("色色，我要色色！色色在哪里？")
@@ -53,7 +53,7 @@ async def handle_color(
         logger.exception("Error occurred while generating image")
         await matcher.finish(f"不许色色！\n{type(e).__name__}: {e}")
 
-    msg_list: List[Segment] = [Image(raw=image)]
+    msg_list: list[Segment] = [Image(raw=image)]
     if config.color_show_desc:
         image_desc = (
             f"HEX: {'; '.join(x.as_hex() for x in colors)}\n"
@@ -66,7 +66,7 @@ async def handle_color(
     await matcher.finish()
 
 
-def append_color_handlers(matcher: Type[Matcher]):
+def append_color_handlers(matcher: type[Matcher]):
     matcher.append_handler(handle_color_error)
     matcher.append_handler(handle_color)
 

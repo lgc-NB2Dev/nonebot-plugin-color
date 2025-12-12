@@ -1,11 +1,10 @@
-from typing import List
 
 from nonebot import get_plugin_config
 from pydantic import BaseModel, Field
 
 
 class ConfigModel(BaseModel):
-    color_font_families: List[str] = Field(
+    color_font_families: list[str] = Field(
         default_factory=lambda: [
             "HarmonyOS Sans SC",
             "HarmonyOS Sans",

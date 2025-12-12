@@ -1,20 +1,23 @@
 import re
 from contextlib import suppress
 from functools import partial
-from io import BytesIO
-from typing import List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, TypeAlias, cast
 
 from nonebot import logger
 from nonebot.compat import PYDANTIC_V2
 from PIL import Image
 from pil_utils import BuildImage, Text2Image
 from pil_utils.gradient import ColorStop, LinearGradient
-from pil_utils.typing import ColorType
 
 from .config import config
 from .const import COLOR_CHINESE_NAME_MAP
 
-PyDanticColorTuple = Union[Tuple[int, int, int], Tuple[int, int, int, float]]
+if TYPE_CHECKING:
+    from io import BytesIO
+
+    from pil_utils.typing import ColorType
+
+PyDanticColorTuple: TypeAlias = tuple[int, int, int] | tuple[int, int, int, float]
 
 if PYDANTIC_V2:
     from pydantic_core import PydanticCustomError as ColorError
@@ -34,8 +37,8 @@ else:
     from pydantic.errors import ColorError
 
 
-RGBColorTuple = Tuple[int, int, int]
-RGBAColorTuple = Tuple[int, int, int, int]
+RGBColorTuple = tuple[int, int, int]
+RGBAColorTuple = tuple[int, int, int, int]
 
 PADDING = 24
 IMG_SIZE = 256
@@ -77,14 +80,14 @@ def parse_color(color: str) -> Color:
     raise NotValidColorError(color)
 
 
-def split_multi(text: str, *seps: str) -> List[str]:
+def split_multi(text: str, *seps: str) -> list[str]:
     pri, *rest = seps
     for sep in rest:
         text = text.replace(sep, pri)
     return text.split(pri)
 
 
-def parse_multi_color(color: str) -> List[Color]:
+def parse_multi_color(color: str) -> list[Color]:
     if not color:
         return []
     color_strs = [x.strip() for x in split_multi(color, ";", "；")]
@@ -100,7 +103,7 @@ def trans_pydantic_rgba(color: PyDanticColorTuple) -> RGBAColorTuple:
 def reverse_color(rgb: RGBColorTuple) -> RGBColorTuple:
     if all(abs(x - 128) < 16 for x in rgb):
         return (0, 0, 0)
-    return cast(RGBColorTuple, tuple(255 - i for i in rgb))
+    return cast("RGBColorTuple", tuple(255 - i for i in rgb))
 
 
 def reverse_to_black_or_white(rgb: RGBColorTuple) -> RGBColorTuple:
@@ -120,7 +123,7 @@ class ColorText:
     def __init__(
         self,
         target_color: Color,
-        text_color: Optional[RGBColorTuple] = None,
+        text_color: RGBColorTuple | None = None,
     ) -> None:
         self.target_color = target_color
         target_rgb_tuple = target_color.as_rgb_tuple()
@@ -147,7 +150,7 @@ class ColorText:
     def draw_on_image(
         self,
         img: Image.Image,
-        offset_pos: Optional[Tuple[int, int]] = None,
+        offset_pos: tuple[int, int] | None = None,
     ) -> None:
         gx, gy = offset_pos or (0, 0)
         gap_size = (
@@ -163,7 +166,7 @@ class ColorText:
             )
             y_offset += text.height + gap_size
 
-    def to_image(self, bg_color: Optional[ColorType] = None) -> Image.Image:
+    def to_image(self, bg_color: "ColorType | None" = None) -> Image.Image:
         img = Image.new(
             "RGBA",
             (IMG_SIZE, IMG_SIZE),
@@ -173,7 +176,7 @@ class ColorText:
         return img
 
 
-def make_color_stop(*colors: RGBAColorTuple) -> List[ColorStop]:
+def make_color_stop(*colors: RGBAColorTuple) -> list[ColorStop]:
     step_len = 1 / (len(colors) * 2)
     center_steps = [
         ColorStop(step_len * ((2 * i) + 1), c) for i, c in enumerate(colors)
@@ -185,7 +188,7 @@ def make_color_stop(*colors: RGBAColorTuple) -> List[ColorStop]:
     ]
 
 
-def generate_solid_image(color: Color) -> BytesIO:
+def generate_solid_image(color: Color) -> "BytesIO":
     if config.color_show_text:
         return BuildImage(ColorText(color).to_image()).save_png()
     return BuildImage.new(
@@ -195,7 +198,7 @@ def generate_solid_image(color: Color) -> BytesIO:
     ).save_png()
 
 
-def generate_gradient_image(*colors: Color) -> BytesIO:
+def generate_gradient_image(*colors: Color) -> "BytesIO":
     colors_rgba = tuple(trans_pydantic_rgba(x.as_rgb_tuple()) for x in colors)
     colors_len = len(colors_rgba)
 
@@ -227,7 +230,7 @@ def generate_gradient_image(*colors: Color) -> BytesIO:
     return BuildImage(bg_gradient_img).save_png()
 
 
-def generate_image(*colors: Color) -> BytesIO:
+def generate_image(*colors: Color) -> "BytesIO":
     if len(colors) == 1:
         return generate_solid_image(*colors)
     return generate_gradient_image(*colors)
